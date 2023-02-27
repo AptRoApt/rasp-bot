@@ -1,8 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import asyncio
+import time
+from PIL import Image
 
 
+"""
+Уходит много времени на запросы. Нужна асинхронность. 
+"""
 HEADERS = headers = {'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'text/html, */*; q=0.01',
                     'Accept-Encoding': 'UTF-8',
@@ -12,7 +17,7 @@ HEADERS = headers = {'X-Requested-With': 'XMLHttpRequest',
 
 def isGroupNameCorrect(groupName):
     """
-    Обработка ошибок при обращении к расписанию.
+    ИСПОЛЬЗОВАТЬ ПРИ ПОЛУЧЕНИИ НАЗВАНИЯ ГРУППЫ!
     """
     target_url = f"https://rasp.rea.ru/Schedule/PageHeaderCard?selection={groupName.lower()}&catfilter=0"
     headerPage = requests.get(target_url, headers=HEADERS)
@@ -75,11 +80,10 @@ class Lesson:
         time = timetable.get(self.lessonNum, "" )
         return f"{self.lessonNum} {time}\n{self.name}\n{self.type}\n{groupsInfo}\n"
     
-    def getLesson(self, groupName, date, timeSlot):
+    def getLesson(self, groupName, date, timeSlot) :
         """
         Получение данных о паре, принимает название группы, дату и номер пары.
         """
-        isGroupNameCorrect(groupName)
         detailsPage =   getDetailsPage(groupName, date, timeSlot)
         soupDetailsPage = BeautifulSoup(detailsPage.text, 'html.parser')
         try:
@@ -97,7 +101,8 @@ class Lesson:
             room = group.text[index:index + 10] + group.text[index + 19:index + 23]
             self.groups.append([teachers[k].text[7:], room])# [7:] - обрезаем "school "
             k += 1
-            """ 
+        return self
+        """ 
             escape-последовательности - один символ
             room =
             8 корпус -\r\n        507
@@ -106,7 +111,11 @@ class Lesson:
             \___________________/___/
                       19      + 4 = 23   
             """
-        
+    def simplified(self):
+        if self.isEmpty():
+            return ""
+        else:
+            return f"{self.lessonNum}:\n{self.name}\n{self.type}\n"
 
 
 class Day:
@@ -117,21 +126,59 @@ class Day:
         if len(self.lessons) == 0:
             return f"{self.date}\nВ этот день занятий нет.\n\n"
         else:
-            lessonNum = 0
             answer = f"{self.date}\n"
             for lesson in self.lessons:
                 answer += f"{lesson}" 
-                lessonNum += 1
             return answer
     def getDay(self, groupName, date):
         """
         Заполняет расписание дня. Принимает название группы, дату.
         """
-        isGroupNameCorrect(groupName)
         self.date = date
         for timeSlot in range (1,9):
             theLesson = Lesson()
             theLesson.getLesson(groupName,date,timeSlot)
-            if theLesson.isEmpty:
+            if theLesson.isEmpty():
                 continue
             self.lessons.append(theLesson)
+        return self
+    def simplified(self):
+        if len(self.lessons) == 0:
+            return f"{self.date}\nВ этот день занятий нет.\n\n"
+        else:
+            answer = f"{self.date}\n"
+            for lesson in self.lessons:
+                answer += f"{lesson.simplified()}" 
+            return answer+"\n"
+
+
+class Week:
+    def __init__(self):
+        self.days = {
+            "ПОНЕДЕЛЬНИК": Day(),
+            "ВТОРНИК": Day(),
+            "СРЕДА": Day(),
+            "ЧЕТВЕРГ": Day(),
+            "ПЯТНИЦА":Day() ,
+            "СУББОТА": Day()
+        }
+    def __str__(self):
+        answer = ""
+        for day in self.days:
+            answer += f"{day} {self.days[day].simplified()}"
+        return answer
+    def getWeek(self, groupName, weekNum=-1):
+        mainPage = getMainPage(groupName, weekNum)
+        soupMainPage = BeautifulSoup(mainPage.text, "html.parser")
+        divsWithDays = soupMainPage.find_all("div", class_="container")
+        numOfDiv = 0
+        for day in self.days:
+            date = divsWithDays[numOfDiv].find("h5").text[-10:]
+            self.days[day].getDay(groupName, date)
+            numOfDiv += 1
+        return self
+    def getImage(self):
+        schedule = Image.new('RGB', (720, 1280), color="#FFFFFF")
+        
+        schedule.show()
+
