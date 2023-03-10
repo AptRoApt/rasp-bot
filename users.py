@@ -4,8 +4,15 @@ import aiohttp
 from scheduleRea import isGroupNameCorrect 
 
 async def addUser(session, id: str, groupName: str):
-    """
-    Изменяет/добавляет связку id - группа
+    """Добавляет связку "id-ИмяГруппы" в users/users.json. 
+
+    Args:
+        session (aiohttp.ClientSession()): Активная http сессия, нужна для проверки имени группы.
+        id (str): id диалога в вк.
+        groupName (str): Название группы.
+
+    Raises:
+        e: "Неправильное название группы!"
     """
     try:
         await isGroupNameCorrect(session, groupName)
@@ -20,8 +27,10 @@ async def addUser(session, id: str, groupName: str):
 
 
 def deleteUser(id: str):
-    """
-    Удаляет пользователя.
+    """Удаляет связку "id-ИмяГруппы".
+
+    Args:
+        id (str): id диалога.
     """
     try:
         data = json.loads(open("users/users.json", "r").read())
@@ -31,6 +40,14 @@ def deleteUser(id: str):
         print (e)
 
 def getGroup(id: str) -> str:
+    """Отдаёт имя группы, связанное с id.
+
+    Args:
+        id (str): id диалога
+
+    Returns:
+        str: Имя группы. Если группы нет - None.
+    """
     data = json.loads(open("users/users.json", "r").read())
     return data.get(id)
 
