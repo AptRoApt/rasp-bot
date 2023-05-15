@@ -126,14 +126,48 @@ async def getLesson(session, groupName, date, timeSlot) :
 
 
 
-async def getDay(session, groupName, date):
+async def getDay(groupName, date):
     tasks = []
-    for timeSlot in range (1, 9):
-        task = asyncio.create_task(getLesson(groupName, date, timeSlot, session))
-        tasks.append(task)
-    lessons = await asyncio.gather(*tasks)
-    for lesson in lessons:
-        pass
+    day = ""
+    timetable = [
+                "1 пара: (08:30 - 10:00):",
+                "2 пара: (10:10 - 11:40):",
+                "3 пара: (11:50 - 13:20):",
+                "4 пара: (14:00 - 15:30):",
+                "5 пара: (15:40 - 17:10):",
+                "6 пара: (17:20 - 18:50):",
+                "7 пара: (18:55 - 20:25):",
+                "8 пара: (20:30 - 22:00):"
+    ]
+    timetable_iter = iter(timetable)
+    async with aiohttp.ClientSession() as session:
+        for timeSlot in range (1, 9):
+            task = asyncio.create_task(getLesson(session, groupName, date, timeSlot))
+            tasks.append(task)
+        lessons = await asyncio.gather(*tasks)
+    lastLesson = 0
+    for i in range(0, 8):
+        if lessons[i] != None:
+            lastLesson = i
+    if lastLesson == 0:
+        #Занятий нет.
+        return "Занятий нет."
+    """
+    Ещё тут нужны якоря.
+    Расчитывать размер расписания из количества пар. И центрировать, соответственно.
+    Перенести сюда getLesson()
+    """
+    for i in range(0, lastLesson+1):
+        day = day + f"{next(timetable_iter)}\n"
+        if lessons[i] == None:
+            #Пустая пара.
+            day = day + "\n"
+        else:
+            day = day + f"..{lessons[i]['name']}\n..{lessons[i]['type']}\n"
+            for subgroup in lessons[i]['subgroups']:
+                day = day + f"....{subgroup[0]}\n....{subgroup[1]}\n"
+    return day
+        
 
 
 
@@ -200,8 +234,13 @@ async def testWeek():
         end = time.time()
         print (end - start)
 
+async def testDay():
+        start = time.time()
+        print(await getDay("15.27д-пи05/22б", "15.05.2023"))
+        end = time.time()
+        print (end - start)
 
-# asyncio.run(testDay())
-# Week().getImage()
-asyncio.run(testWeek())
+if __name__ == "__main__":
+    asyncio.run(testDay())
+    asyncio.run(testWeek())
 

@@ -1,0 +1,9 @@
+from vkbottle import BuiltinStateDispenser, CtxStorage
+from vkbottle.framework.labeler import BotLabeler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+TOKEN = "vk1.a.OzmEJw09SRFiFiUxA-8-ho6HP4D858cTvkkAVBtLJpWm7BWwi_MfcKMfoTT0M3ze6mIzKqHMzt1Q_oIxKNGRvNEQZCdHQyShF5Rpm0f2KYDXgL2nxH6w9su-6t9gHiNEiXhnNMSjNUi_yl7orcgv79t7NxxiRNa8NbOI4JoPlAcgMrWeHtJnDQSCr1kEj2aKB0Hmr8zxhxX0ROebsDSDCQ"
+state_dispenser = BuiltinStateDispenser()
+ctx = CtxStorage
+labeler = BotLabeler()
+aioscheduler = AsyncIOScheduler()
