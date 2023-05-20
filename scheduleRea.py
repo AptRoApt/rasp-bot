@@ -10,7 +10,7 @@ HEADERS = headers = {'X-Requested-With': 'XMLHttpRequest',
                     'Accept-Encoding': 'UTF-8',
                     'viewmode': 'list',
                     'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-                    'Connection': 'close'}
+                    'Connection': 'keep-alive'}
 
 async def isGroupNameCorrect(session, groupName):
     """Вызывает исключение, если группы не существует (ну или сервер лежит).
@@ -88,9 +88,10 @@ async def getLesson(session, groupName, date, timeSlot) :
         lesson = {
         "name": "",
         "type": "",
-        "subgroups": [[ИмяУчителя, аудитория], [ИмяУчителя, аудитория]]
+        "sugrobups": [[ИмяУчителя, аудитория], [ИмяУчителя, аудитория]]
     }
     """
+    #Составление расписания занятия на основе объектов.
     lesson = {
         "name": "",
         "type": "",

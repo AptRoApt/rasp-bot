@@ -1,5 +1,5 @@
 from vkbottle.bot import Bot, Message
-from global_variables.config import TOKEN, labeler, state_dispenser, aioscheduler
+from global_variables.variable_holder import TOKEN, labeler, state_dispenser, aioscheduler
 from handlers.schedule_handlers import schedule_labeler
 import asyncio
 

@@ -1,5 +1,6 @@
 from vkbottle import BaseStateGroup
 
-class ScheduleStates(BaseStateGroup):
-    IS_ON = "bot is on"
-    IS_OFF = "bot is off"
+class BotChatStates(BaseStateGroup):
+    MAILING_IS_ON = "mailing is on"
+    MAILING_IS_OFF = "mailing is off"
+    CHANGE_MAILING_TIME = "changing mailing time"
